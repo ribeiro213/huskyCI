@@ -148,10 +148,14 @@ func (cH *CheckUtils) checkDefaultUser(configAPI *apiContext.APIConfig) error {
 	return nil
 }
 
-func FormatDockerHostAddress(dockerHost types.DockerAPIAddresses, configAPI *apiContext.APIConfig) string {
-	hostIndex := dockerHost.CurrentHostIndex % len(dockerHost.HostList)
-	host := dockerHost.HostList[hostIndex]
-	return fmt.Sprintf("https://%s:%d", host, configAPI.DockerHostsConfig.DockerAPIPort)
+func FormatDockerHostAddress(dockerHost types.DockerAPIAddresses, configAPI *apiContext.APIConfig) (string, error) {
+	host := ""
+	if len(dockerHost.HostList) > 0 {
+		hostIndex := dockerHost.CurrentHostIndex % len(dockerHost.HostList)
+		host = dockerHost.HostList[hostIndex]
+		return fmt.Sprintf("https://%s:%d", host, configAPI.DockerHostsConfig.DockerAPIPort), nil
+	}
+	return "", errors.New("docker API host list is empty")
 }
 
 func checkSecurityTest(securityTestName string, configAPI *apiContext.APIConfig) error {
